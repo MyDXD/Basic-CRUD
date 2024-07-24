@@ -1,2 +1,2 @@
 # Basic-CRUD
-ภาษาที่ใช้ - html - css - javascript - nodejs
+ภาษาที่ใช้ - html - css - javascript - nodejs - sql
