@@ -2,6 +2,23 @@ body {
   font-family: "kanit";
 }
 
+.message {
+  padding: 10px;
+  background-color: lightgray;
+  margin: 10px 0;
+  display: none;
+}
+
+.message.success {
+  background-color: lightgreen;
+  display: block;
+}
+
+.message.danger {
+  background-color: lightcoral;
+  display: block;
+}
+
 .container {
   width: 100%;
   max-width: 640px;
