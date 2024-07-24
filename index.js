@@ -1,3 +1,58 @@
+const BASE_URL = "http://localhost:8000";
+
+// default mode ของหน้านี้คือ mode สร้าง
+let mode = "CREATE";
+let selectedId = -1;
+
+window.onload = async () => {
+  // นำ parameter ทั้งหมดมาใส่ตัวแปร urlParams
+  const urlParams = new URLSearchParams(window.location.search);
+  // ดึง id ออกมาจาก parameter
+  const id = urlParams.get("id");
+  if (id) {
+    let editHeadFrom = await document.querySelector(".header.form-input");
+    editHeadFrom.textContent = "Edit user";
+    // ถ้ามี id = เปลี่ยน mode และเก็บตัวแปร id เอาไว้
+    mode = "EDIT";
+    selectedId = id;
+
+    
+
+    // select ทุก dom ออกมา
+    let firstNameDOM = document.querySelector("input[name=firstname]");
+    let lastNameDOM = document.querySelector("input[name=lastname]");
+    let ageDOM = document.querySelector("input[name=age]");
+    let genderDOMs = document.querySelectorAll("input[name=gender]");
+    let interestDOMs = document.querySelectorAll("input[name=interest]");
+    let descriptionDOM = document.querySelector("textarea[name=description]");
+    try {
+      const response = await axios.get(`${BASE_URL}/users/${id}`);
+      const user = response.data;
+       
+      console.log(user);
+      // เริ่มทำการใส่ข้อมูล
+      firstNameDOM.value = user.firstname;
+      lastNameDOM.value = user.lastname;
+      ageDOM.value = user.age;
+      descriptionDOM.value = user.description;
+
+      for (let i = 0; i < genderDOMs.length; i++) {
+        if (genderDOMs[i].value == user.gender) {
+          genderDOMs[i].checked = true;
+        }
+      }
+      const interests = user.interest.split(",").map((interest) => interest.trim());
+
+      for (let i = 0; i < interestDOMs.length; i++) {
+        if (interests.includes(interestDOMs[i].value)) {
+          interestDOMs[i].checked = true;
+        }
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
+};
 const validateData = (userData) => {
   let errors = [];
   if (!userData.firstname) {
