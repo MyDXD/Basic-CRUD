@@ -2,12 +2,30 @@ const bodyParser = require("body-parser");
 const express = require("express");
 const mysql = require("mysql2/promise.js");
 const cors = require("cors");
+const session = require("express-session");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+
+
 // ประกาศเริ่มต้นการใช้ express
 const app = express();
 const port = 8000;
+const secret = "mysecret";
+
 
 app.use(bodyParser.json());
 app.use(cors());
+
+app.use(cookieParser());
+
+app.use(
+  session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: true,
+  }),
+);
 
 let conn = null;
 
@@ -40,6 +58,56 @@ const validateData = (userData) => {
   }
   return errors;
 };
+
+ //สมัครสมาชิก
+app.post("/api/register", async (req, res) => {
+  const { email, password } = req.body;
+
+  const [rows] = await conn.query("SELECT * FROM users WHERE email = ?", email);
+
+
+  //ตรวจสอบ email ซ้ำ
+  if (rows.length) {
+    return res.status(400).send({ message: "Email is already registered" });
+  }
+
+  // Hash the password
+  const hash = await bcrypt.hash(password, 10);
+
+  // 10 = salt (การสุ่มค่าเพื่อเพิ่มความซับซ้อนในการเข้ารหัส)
+  // และมันจะถูกนำมาใช้ตอน compare
+
+  // Store the user data
+  const userData = { email, password: hash };
+
+  try {
+    const result = await conn.query("INSERT INTO users SET ?", userData);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      message: "insert fail",
+      error,
+    });
+  }
+
+  res.status(201).send({ message: "User registered successfully" });
+});
+
+
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const [result] = await conn.query("SELECT * from users WHERE email = ?", email);
+  const user = result[0];
+  const match = await bcrypt.compare(password, user.password);
+
+  if (!match) {
+    return res.status(400).send({ message: "Invalid email or password" });
+  }
+
+  res.send({ message: "Login successful" });
+});
+
 
 app.get("/users", async (req, res) => {
   try {
