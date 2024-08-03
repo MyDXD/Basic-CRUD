@@ -8,7 +8,10 @@ const secret = "mysecret";
 const router = express.Router();
 
 //สมัครสมาชิก
-router.post("/api/register", async (req, res) => {
+router.post("/register", async (req, res) => {
+
+  const conn = await connectMySQL()
+
   const { email, password } = req.body;
 
   const [rows] = await conn.query("SELECT * FROM users WHERE email = ?", email);
@@ -48,6 +51,11 @@ router.post("/login", async (req, res) => {
     "SELECT * from users WHERE email = ?",
     email
   );
+  // ตรวจสอบว่ามี user ที่มี email นี้หรือไม่
+  if (result.length === 0) {
+    return res.status(400).send({ message: "Invalid email or password" });
+  }
+  
   const user = result[0];
   const match = await bcrypt.compare(password, user.password);
 
@@ -56,18 +64,18 @@ router.post("/login", async (req, res) => {
   }
 
   const token = jwt.sign({ email, role: "admin" }, secret, { expiresIn: "1h" });
-  res.cookie("token", token, {
-    maxAge: 3600000, // 1 hour
-    secure: true,
-    httpOnly: true,
-    sameSite: "none",
-  });
+  
+  // res.cookie("token", token, {
+  //   maxAge: 3600000, // 1 hour
+  //   secure: true,
+  //   httpOnly: true,
+  //   sameSite: 'None'
+  // });
 
   // console.log("get session", req.sessionID);
   // req.session.user = user;
   // req.session.userId = user.id;
-
-  res.send({ message: "Login successful" });
+  res.send({ message: "Login successful" ,token});
 });
 
 module.exports = router;

@@ -1,9 +1,16 @@
 const BASE_URL = "http://localhost:8000";
 
 window.onload = async () => {
+  try {
+    const authToken = localStorage.getItem("token");
+    const response = await axios.get("http://localhost:8000/api/users", {
+      header: {
+        'authorization': `Bearer ${authToken}`,
+      },
+    });
+    console.log(response.data);
+  } catch (error) {}
   await loadData();
-
- 
 
   // ทำการดึง button class=delete ที่ติดกับทุก DOM ที่สร้างใหม่มา
   let deleteDOMs = document.getElementsByClassName("delete");
@@ -26,7 +33,9 @@ window.onload = async () => {
 
 const loadData = async () => {
   //get user ทั้งหมดออกมา
-  const response = await axios.get(`${BASE_URL}/users`, { withCredentials: true });
+  const response = await axios.get(`${BASE_URL}/users`, {
+    withCredentials: true,
+  });
   console.log(response);
   const users = response.data;
 
