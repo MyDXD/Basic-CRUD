@@ -26,7 +26,8 @@ window.onload = async () => {
 
 const loadData = async () => {
   //get user ทั้งหมดออกมา
-  const response = await axios.get(`${BASE_URL}/users`);
+  const response = await axios.get(`${BASE_URL}/users`, { withCredentials: true });
+  console.log(response);
   const users = response.data;
 
   // ประกอบ HTML จาก user data โดยใช้ <li> และ สร้างปุ่มสำหรับ Edit และ Delete
