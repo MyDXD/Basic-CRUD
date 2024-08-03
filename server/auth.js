@@ -8,8 +8,7 @@ const authenticateToken = (req, res, next) => {
   const token = authHeader && authHeader.split(" ")[1];
 
   
-  if (token == null) return res.sendStatus(401); // if there isn't any token
-
+  if (!token) return res.status(401).send('Access Denied');
 
   try {
     const user = jwt.verify(token, secret);
